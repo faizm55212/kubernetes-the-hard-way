@@ -52,18 +52,19 @@ certs=(
 
 ```bash
 for i in ${certs[*]}; do
-  openssl genrsa -out "${i}.key" 4096
+  mkdir -p $i
+  openssl genrsa -out "${i}/${i}.key" 4096
 
-  openssl req -new -key "${i}.key" -sha256 \
+  openssl req -new -key "${i}/${i}.key" -sha256 \
     -config "ca.conf" -section ${i} \
-    -out "${i}.csr"
+    -out "${i}/${i}.csr"
 
-  openssl x509 -req -days 3653 -in "${i}.csr" \
+  openssl x509 -req -days 3653 -in "${i}/${i}.csr" \
     -copy_extensions copyall \
     -sha256 -CA "ca.crt" \
     -CAkey "ca.key" \
     -CAcreateserial \
-    -out "${i}.crt"
+    -out "${i}/${i}.crt"
 done
 ```
 
@@ -85,10 +86,10 @@ for host in worker-0 worker-1; do
 
   scp ca.crt root@${host}:/var/lib/kubelet/
 
-  scp ${host}.crt \
+  scp ${host}/${host}.crt \
     root@${host}:/var/lib/kubelet/kubelet.crt
 
-  scp ${host}.key \
+  scp ${host}/${host}.key \
     root@${host}:/var/lib/kubelet/kubelet.key
 done
 ```
@@ -98,9 +99,9 @@ Copy the appropriate certificates and private keys to the `server` machine:
 ```bash
 scp \
   ca.key ca.crt \
-  kube-api-server.key kube-api-server.crt \
-  service-accounts.key service-accounts.crt \
-  root@server:~/
+  kube-api-server/kube-api-server.key kube-api-server/kube-api-server.crt \
+  service-accounts/service-accounts.key service-accounts/service-accounts.crt \
+  root@server-0:~/
 ```
 
 > The `kube-proxy`, `kube-controller-manager`, `kube-scheduler`, and `kubelet` client certificates will be used to generate client authentication configuration files in the next lab.
