@@ -32,22 +32,20 @@ curl --cacert /kthwLab/certs/ca.crt \
 Generate a kubeconfig file suitable for authenticating as the `admin` user:
 
 ```bash
-{
-  kubectl config set-cluster kubernetes-the-hard-way \
-    --certificate-authority=/kthwLab/certs/ca.crt \
-    --embed-certs=true \
-    --server=https://server-0.kubernetes.local:6443
+kubectl config set-cluster kubernetes-the-hard-way \
+  --certificate-authority=/kthwLab/certs/ca.crt \
+  --embed-certs=true \
+  --server=https://server-0.kubernetes.local:6443
 
-  kubectl config set-credentials admin \
-    --client-certificate=/kthwLab/certs/admin.crt \
-    --client-key=/kthwLab/certs/admin.key
+kubectl config set-credentials admin \
+  --client-certificate=/kthwLab/certs/admin/admin.crt \
+  --client-key=/kthwLab/certs/admin/admin.key
 
-  kubectl config set-context kubernetes-the-hard-way \
-    --cluster=kubernetes-the-hard-way \
-    --user=admin
+kubectl config set-context kubernetes-the-hard-way \
+  --cluster=kubernetes-the-hard-way \
+  --user=admin
 
-  kubectl config use-context kubernetes-the-hard-way
-}
+kubectl config use-context kubernetes-the-hard-way
 ```
 The results of running the command above should create a kubeconfig file in the default location `~/.kube/config` used by the  `kubectl` commandline tool. This also means you can run the `kubectl` command without specifying a config.
 
