@@ -19,7 +19,7 @@ cat machines.txt
 ```
 
 ```text
-XXX.XXX.XXX.XXX server.kubernetes.local server
+XXX.XXX.XXX.XXX server-0.kubernetes.local server
 XXX.XXX.XXX.XXX worker-0.kubernetes.local worker-0 10.200.0.0/24
 XXX.XXX.XXX.XXX worker-1.kubernetes.local worker-1 10.200.1.0/24
 ```
@@ -121,7 +121,7 @@ done < machines.txt
 ```
 
 ```text
-server.kubernetes.local
+server-0.kubernetes.local
 worker-0.kubernetes.local
 worker-1.kubernetes.local
 ```
@@ -155,7 +155,7 @@ cat hosts
 ```text
 
 # Kubernetes The Hard Way
-XXX.XXX.XXX.XXX server.kubernetes.local server
+XXX.XXX.XXX.XXX server-0.kubernetes.local server
 XXX.XXX.XXX.XXX worker-0.kubernetes.local worker-0
 XXX.XXX.XXX.XXX worker-1.kubernetes.local worker-1
 ```
@@ -186,7 +186,7 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 
 # Kubernetes The Hard Way
-XXX.XXX.XXX.XXX server.kubernetes.local server
+XXX.XXX.XXX.XXX server-0.kubernetes.local server
 XXX.XXX.XXX.XXX worker-0.kubernetes.local worker-0
 XXX.XXX.XXX.XXX worker-1.kubernetes.local worker-1
 ```
