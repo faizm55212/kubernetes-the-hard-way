@@ -167,10 +167,7 @@ EOF
 
 # 10. Fixing ownership and permissions for user 
 
-chown -R "$USER_NAME":"$USER_NAME" "$BASE_DIR/ssh"
-chown -R "$USER_NAME":"$USER_NAME" "$BASE_DIR/vms"
-chown -R "$USER_NAME":"$USER_NAME" "$BASE_DIR/kubernetes-the-hard-way"
-chown -R "$USER_NAME":"$USER_NAME" "$BASE_DIR/debian-image"
+chown -R "$USER_NAME":"$USER_NAME" "$BASE_DIR"
 
 echo "--- VM creation process complete! ---"
 echo "VMs should now be running. You can check their status with 'virsh list --all'."

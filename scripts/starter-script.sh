@@ -22,7 +22,7 @@ STATIC_HOSTS=$(cat <<EOT
 EOT
 )
 
-SSH_PUBKEY='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCxE9L5tUcV/ftZ21z/15ry8FejVaQ18+4UkoMvZN/0zuGT5Olthroh8En6EGtOsYZAMUs0IyISQnd4g7lO8+LalKJkWIteKgKOMYP8UQ8WWyb6q2PtC9g7KWPwVdgYoVi1iKm/jr65UhzMTv1g+emxiar7ZMNMK/dT+22lYi7BaTxBHC+nFX39HRv7lWWbEhgi7yJkzck721n3RWrk1NP/ta1qAQnh94AMxD1neZPSrRd8CX4HyHPyhBWnePtj84hkI+eBDoBaSno2+rUAiIaae9wY+Z9zS26ry0Tm/kks4qvhSenKqcLL4ajuolmpJnWlxAKCG/HEpEnF4TIQLb8v/WbGSbQX9Uq+/7WZFApwYmjd+ph3HUoQERSK3rmtpIPUdjb05xJwX3ypEn1Fyk65IhcwPVT4bSJPKdVLGt7HRSmwzvXYuqNPS4MEjhwcoK/l9pUabvj9rs73/xlZjsef04E+w8sAa0rk6mhK+QoFd3JAtQhzJdSkUJuo5Y6YuNk= root@unknown-pc'
+SSH_PUBKEY='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCtVm2B684Vx7FaRjgq8aNACRAg0UyfuKKmbBVx0AmZR7TTNEtCl3yA72hEQ2q0jRAr2m4kOprmMS48f0Ic9SPPSbp1zZCHDfcUMG9E1yiCX5uQIveXuGGiWniAE2EuttlYBd0Ij/FGeE4eLpmescAP6pDqJfbeeN2eFoJgA+tfaijCTeq9SryaOCViuCSk8ymNli6MNMD/3DAkEL8QLYeR9xsbfVr/3q50nNJvR5LlUmvlp/a1ufniFe1HN02aPI0/4W/N0bmEKUSZRadsTzI5Tl3I6376bf3UpwQJYZkLn+BKWcpkOECmEYnQuJycnvwZkz95j6Gu8dIzl039P0r+jTZEje8OQpN1XtxM4ff6WslqWfC1BigiTgIGP1NnoQ7ZD9R68Sw7+MDGXp44ByovF9SaVnuoY2371y0DKd+61MH/e+Uzn1crzWBK9oN+zZTRIoJU+Waq8dbajVI94yXlwFaoqWV77BhKUgCwhgsFra2m9EOlFFBSsKggfQUhon8= root@unknown-pc'
 
 echo "[*] Setting hostname to $VM_NAME"
 echo "$VM_NAME" > /etc/hostname
@@ -47,6 +47,12 @@ mkdir -p /root/.ssh
 chmod 700 /root/.ssh
 echo "$SSH_PUBKEY" > /root/.ssh/authorized_keys
 chmod 600 /root/.ssh/authorized_keys
+
+sed -i 's/^\(session\s\+optional\s\+pam_motd\.so.*\)/#\1/' /etc/pam.d/sshd
+
+if ! grep -q '^PrintLastLog no' /etc/ssh/sshd_config; then
+  echo "PrintLastLog no" >> /etc/ssh/sshd_config
+fi
 
 systemctl enable ssh
 systemctl restart ssh
