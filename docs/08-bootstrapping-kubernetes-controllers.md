@@ -110,7 +110,7 @@ At this point the Kubernetes control plane is up and running. Run the following 
 Make a HTTP request for the Kubernetes version info:
 
 ```bash
-curl --cacert ca.crt \
+curl --cacert /kthwLab/certs/ca.crt \
   https://server-0.kubernetes.local:6443/version
 ```
 

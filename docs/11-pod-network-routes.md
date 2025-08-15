@@ -13,38 +13,36 @@ In this section you will gather the information required to create routes in the
 Print the internal IP address and Pod CIDR range for each worker instance:
 
 ```bash
-{
-  SERVER_IP=$(grep server machines.txt | cut -d " " -f 1)
-  NODE_0_IP=$(grep worker-0 machines.txt | cut -d " " -f 1)
-  NODE_0_SUBNET=$(grep worker-0 machines.txt | cut -d " " -f 4)
-  NODE_1_IP=$(grep worker-1 machines.txt | cut -d " " -f 1)
-  NODE_1_SUBNET=$(grep worker-1 machines.txt | cut -d " " -f 4)
-}
+SERVER_0_IP=$(grep server /kthwLab/machines.txt | cut -d " " -f 1)
+WORKER_0_IP=$(grep worker-0 /kthwLab/machines.txt | cut -d " " -f 1)
+WORKER_0_SUBNET=$(grep worker-0 /kthwLab/machines.txt | cut -d " " -f 4)
+WORKER_1_IP=$(grep worker-1 /kthwLab/machines.txt | cut -d " " -f 1)
+WORKER_1_SUBNET=$(grep worker-1 /kthwLab/machines.txt | cut -d " " -f 4)
 ```
 
 ```bash
-ssh root@server-0 <<EOF
-  ip route add ${NODE_0_SUBNET} via ${NODE_0_IP}
-  ip route add ${NODE_1_SUBNET} via ${NODE_1_IP}
+ssh -i /kthwLab/ssh/id_rsa root@server-0 <<EOF
+  ip route add ${WORKER_0_SUBNET} via ${WORKER_0_IP}
+  ip route add ${WORKER_1_SUBNET} via ${WORKER_1_IP}
 EOF
 ```
 
 ```bash
-ssh root@worker-0 <<EOF
-  ip route add ${NODE_1_SUBNET} via ${NODE_1_IP}
+ssh -i /kthwLab/ssh/id_rsa root@worker-0 <<EOF
+  ip route add ${WORKER_1_SUBNET} via ${WORKER_1_IP}
 EOF
 ```
 
 ```bash
-ssh root@worker-1 <<EOF
-  ip route add ${NODE_0_SUBNET} via ${NODE_0_IP}
+ssh -i /kthwLab/ssh/id_rsa root@worker-1 <<EOF
+  ip route add ${WORKER_0_SUBNET} via ${WORKER_0_IP}
 EOF
 ```
 
 ## Verification 
 
 ```bash
-ssh root@server-0 ip route
+ssh -i /kthwLab/ssh/id_rsa root@server-0 ip route
 ```
 
 ```text
@@ -55,7 +53,7 @@ XXX.XXX.XXX.0/24 dev ens160 proto kernel scope link src XXX.XXX.XXX.XXX
 ```
 
 ```bash
-ssh root@worker-0 ip route
+ssh -i /kthwLab/ssh/id_rsa root@worker-0 ip route
 ```
 
 ```text
@@ -65,7 +63,7 @@ XXX.XXX.XXX.0/24 dev ens160 proto kernel scope link src XXX.XXX.XXX.XXX
 ```
 
 ```bash
-ssh root@worker-1 ip route
+ssh -i /kthwLab/ssh/id_rsa root@worker-1 ip route
 ```
 
 ```text

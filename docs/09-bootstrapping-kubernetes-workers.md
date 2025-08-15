@@ -10,45 +10,67 @@ Copy the Kubernetes binaries and systemd unit files to each worker instance:
 
 ```bash
 for HOST in worker-0 worker-1; do
-  SUBNET=$(grep ${HOST} machines.txt | cut -d " " -f 4)
-  sed "s|SUBNET|$SUBNET|g" \
-    configs/10-bridge.conf > 10-bridge.conf
+  ssh -i /kthwLab/ssh/id_rsa root@${HOST} \
+      mkdir -p /etc/cni/net.d /var/lib/kubelet /var/lib/kube-proxy /var/lib/kubernetes /var/run/kubernetes
 
+  SUBNET=$(grep ${HOST} /kthwLab/machines.txt | cut -d " " -f 4)
   sed "s|SUBNET|$SUBNET|g" \
-    configs/kubelet-config.yaml > kubelet-config.yaml
+    /kthwLab/kubernetes-the-hard-way/configs/10-bridge.conf > 10-bridge.conf
 
-  scp 10-bridge.conf kubelet-config.yaml \
-  root@${HOST}:~/
+  scp -i /kthwLab/ssh/id_rsa 10-bridge.conf \
+  root@${HOST}:/etc/cni/net.d/
+
+  scp -i /kthwLab/ssh/id_rsa /kthwLab/kubernetes-the-hard-way/configs/kubelet-config.yaml \
+  root@${HOST}:/var/lib/kubelet/kubelet-config.yaml
+  rm 10-bridge.conf
 done
 ```
 
 ```bash
 for HOST in worker-0 worker-1; do
-  scp \
-    downloads/worker/* \
-    downloads/client/kubectl \
-    configs/99-loopback.conf \
-    configs/containerd-config.toml \
-    configs/kube-proxy-config.yaml \
-    units/containerd.service \
-    units/kubelet.service \
-    units/kube-proxy.service \
+  ssh -i /kthwLab/ssh/id_rsa root@${HOST} mkdir -p /var/lib/kube-proxy/ /etc/containerd/
+  scp -i /kthwLab/ssh/id_rsa \
+    /kthwLab/Downloads/worker/crictl /kthwLab/Downloads/worker/kube-proxy \
+    /kthwLab/Downloads/worker/kubelet /kthwLab/Downloads/worker/runc \
+    /kthwLab/Downloads/client/kubectl \
+    root@${HOST}:/usr/local/bin/
+  scp -i /kthwLab/ssh/id_rsa \
+    /kthwLab/Downloads/worker/containerd /kthwLab/Downloads/worker/containerd-shim-runc-v2\
+    /kthwLab/Downloads/worker/containerd-stress \
+    root@${HOST}:/bin/
+  scp -i /kthwLab/ssh/id_rsa \
+    /kthwLab/Downloads/worker/ctr \
     root@${HOST}:~/
+  scp -i /kthwLab/ssh/id_rsa \
+    /kthwLab/kubernetes-the-hard-way/units/containerd.service \
+    /kthwLab/kubernetes-the-hard-way/units/kubelet.service \
+    /kthwLab/kubernetes-the-hard-way/units/kube-proxy.service \
+    root@${HOST}:/etc/systemd/system/
+  scp -i /kthwLab/ssh/id_rsa \
+    /kthwLab/kubernetes-the-hard-way/configs/99-loopback.conf \
+    root@${HOST}:/etc/cni/net.d/
+  scp -i /kthwLab/ssh/id_rsa \
+    /kthwLab/kubernetes-the-hard-way/configs/containerd-config.toml \
+    root@${HOST}:/etc/containerd/config.toml
+  scp -i /kthwLab/ssh/id_rsa \
+    /kthwLab/kubernetes-the-hard-way/configs/kube-proxy-config.yaml \
+    root@${HOST}:/var/lib/kube-proxy/
 done
 ```
 
 ```bash
 for HOST in worker-0 worker-1; do
-  scp \
-    downloads/cni-plugins/* \
-    root@${HOST}:~/cni-plugins/
+  ssh -i /kthwLab/ssh/id_rsa root@${HOST} mkdir -p /opt/cni/bin
+  scp -i /kthwLab/ssh/id_rsa \
+    /kthwLab/Downloads/cni-plugins/* \
+    root@${HOST}:/opt/cni/bin/
 done
 ```
 
 The commands in the next section must be run on each worker instance: `worker-0`, `worker-1`. Login to the worker instance using the `ssh` command. Example:
 
 ```bash
-ssh root@worker-0
+ssh -i /kthwLab/ssh/id_rsa root@worker-0
 ```
 
 ## Provisioning a Kubernetes Worker Node
@@ -56,10 +78,7 @@ ssh root@worker-0
 Install the OS dependencies:
 
 ```bash
-{
-  apt-get update
-  apt-get -y install socat conntrack ipset kmod
-}
+apt-get -y install socat conntrack ipset kmod
 ```
 
 > The socat binary enables support for the `kubectl port-forward` command.
@@ -82,96 +101,27 @@ swapoff -a
 
 > To ensure swap remains off after reboot consult your Linux distro documentation.
 
-Create the installation directories:
-
-```bash
-mkdir -p \
-  /etc/cni/net.d \
-  /opt/cni/bin \
-  /var/lib/kubelet \
-  /var/lib/kube-proxy \
-  /var/lib/kubernetes \
-  /var/run/kubernetes
-```
-
-Install the worker binaries:
-
-```bash
-{
-  mv crictl kube-proxy kubelet runc \
-    /usr/local/bin/
-  mv containerd containerd-shim-runc-v2 containerd-stress /bin/
-  mv cni-plugins/* /opt/cni/bin/
-}
-```
-
-### Configure CNI Networking
-
-Create the `bridge` network configuration file:
-
-```bash
-mv 10-bridge.conf 99-loopback.conf /etc/cni/net.d/
-```
-
 To ensure network traffic crossing the CNI `bridge` network is processed by `iptables`, load and configure the `br-netfilter` kernel module:
 
 ```bash
-{
-  modprobe br-netfilter
-  echo "br-netfilter" >> /etc/modules-load.d/modules.conf
-}
+modprobe br-netfilter
+echo "br-netfilter" >> /etc/modules-load.d/modules.conf
 ```
 
 ```bash
-{
-  echo "net.bridge.bridge-nf-call-iptables = 1" \
+echo "net.bridge.bridge-nf-call-iptables = 1" \
     >> /etc/sysctl.d/kubernetes.conf
-  echo "net.bridge.bridge-nf-call-ip6tables = 1" \
+echo "net.bridge.bridge-nf-call-ip6tables = 1" \
     >> /etc/sysctl.d/kubernetes.conf
-  sysctl -p /etc/sysctl.d/kubernetes.conf
-}
-```
-
-### Configure containerd
-
-Install the `containerd` configuration files:
-
-```bash
-{
-  mkdir -p /etc/containerd/
-  mv containerd-config.toml /etc/containerd/config.toml
-  mv containerd.service /etc/systemd/system/
-}
-```
-
-### Configure the Kubelet
-
-Create the `kubelet-config.yaml` configuration file:
-
-```bash
-{
-  mv kubelet-config.yaml /var/lib/kubelet/
-  mv kubelet.service /etc/systemd/system/
-}
-```
-
-### Configure the Kubernetes Proxy
-
-```bash
-{
-  mv kube-proxy-config.yaml /var/lib/kube-proxy/
-  mv kube-proxy.service /etc/systemd/system/
-}
+sysctl -p /etc/sysctl.d/kubernetes.conf
 ```
 
 ### Start the Worker Services
 
 ```bash
-{
-  systemctl daemon-reload
-  systemctl enable containerd kubelet kube-proxy
-  systemctl start containerd kubelet kube-proxy
-}
+systemctl daemon-reload
+systemctl enable containerd kubelet kube-proxy
+systemctl start containerd kubelet kube-proxy
 ```
 
 Check if the kubelet service is running:
@@ -193,9 +143,8 @@ Run the following commands from the `jumpbox` machine.
 List the registered Kubernetes nodes:
 
 ```bash
-ssh root@server-0 \
-  "kubectl get nodes \
-  --kubeconfig admin.kubeconfig"
+ssh -i /kthwLab/ssh/id_rsa root@server-0 \
+  "kubectl get nodes --kubeconfig admin.kubeconfig"
 ```
 
 ```

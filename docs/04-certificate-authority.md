@@ -9,7 +9,7 @@ In this section you will provision a Certificate Authority that can be used to g
 Take a moment to review the `ca.conf` configuration file:
 
 ```bash
-cat ca.conf
+cat /kthwLab/kubernetes-the-hard-way/ca.conf
 ```
 
 You don't need to understand everything in the `ca.conf` file to complete this tutorial, but you should consider it a starting point for learning `openssl` and the configuration that goes into managing certificates at a high level.

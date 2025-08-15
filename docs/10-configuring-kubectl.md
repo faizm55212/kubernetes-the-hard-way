@@ -11,7 +11,7 @@ Each kubeconfig requires a Kubernetes API Server to connect to.
 You should be able to ping `server-0.kubernetes.local` based on the `/etc/hosts` DNS entry from a previous lab.
 
 ```bash
-curl --cacert ca.crt \
+curl --cacert /kthwLab/certs/ca.crt \
   https://server-0.kubernetes.local:6443/version
 ```
 
@@ -34,13 +34,13 @@ Generate a kubeconfig file suitable for authenticating as the `admin` user:
 ```bash
 {
   kubectl config set-cluster kubernetes-the-hard-way \
-    --certificate-authority=ca.crt \
+    --certificate-authority=/kthwLab/certs/ca.crt \
     --embed-certs=true \
     --server=https://server-0.kubernetes.local:6443
 
   kubectl config set-credentials admin \
-    --client-certificate=admin.crt \
-    --client-key=admin.key
+    --client-certificate=/kthwLab/certs/admin.crt \
+    --client-key=/kthwLab/certs/admin.key
 
   kubectl config set-context kubernetes-the-hard-way \
     --cluster=kubernetes-the-hard-way \

@@ -29,7 +29,7 @@ echo "$VM_NAME" > /etc/hostname
 hostname "$VM_NAME"
 
 
-echo "${FQDN_MAP[$VM_NAME]}" > /etc/hostname
+echo "$VM_NAME" > /etc/hostname
 
 echo "$STATIC_HOSTS" > /etc/hosts
 
