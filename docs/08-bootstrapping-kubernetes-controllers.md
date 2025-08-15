@@ -1,119 +1,54 @@
 # Bootstrapping the Kubernetes Control Plane
 
-In this lab you will bootstrap the Kubernetes control plane. The following components will be installed on the `server` machine: Kubernetes API Server, Scheduler, and Controller Manager.
+In this lab you will bootstrap the Kubernetes control plane. The following components will be installed on the `server-0` machine: Kubernetes API Server, Scheduler, and Controller Manager.
 
 ## Prerequisites
 
-Connect to the `jumpbox` and copy Kubernetes binaries and systemd unit files to the `server` machine:
+Connect to the `jumpbox` and copy Kubernetes binaries and systemd unit files to the `server-0` machine:
 
 ```bash
-scp \
-  downloads/controller/kube-apiserver \
-  downloads/controller/kube-controller-manager \
-  downloads/controller/kube-scheduler \
-  downloads/client/kubectl \
-  units/kube-apiserver.service \
-  units/kube-controller-manager.service \
-  units/kube-scheduler.service \
-  configs/kube-scheduler.yaml \
-  configs/kube-apiserver-to-kubelet.yaml \
-  root@server:~/
+scp -i /kthwLab/ssh/id_rsa \
+  /kthwLab/Downloads/controller/kube-apiserver \
+  /kthwLab/Downloads/controller/kube-controller-manager \
+  /kthwLab/Downloads/controller/kube-scheduler \
+  /kthwLab/Downloads/client/kubectl \
+  root@server-0:/usr/local/bin/
+
+scp -i /kthwLab/ssh/id_rsa \
+  /kthwLab/kubernetes-the-hard-way/units/kube-apiserver.service \
+  /kthwLab/kubernetes-the-hard-way/units/kube-controller-manager.service \
+  /kthwLab/kubernetes-the-hard-way/units/kube-scheduler.service \
+  root@server-0:/etc/systemd/system/
+
+scp -i /kthwLab/ssh/id_rsa \
+  /kthwLab/kubernetes-the-hard-way/configs/kube-scheduler.yaml \
+  /kthwLab/kubernetes-the-hard-way/configs/kube-apiserver-to-kubelet.yaml \
+  root@server-0:~/
 ```
 
-The commands in this lab must be run on the `server` machine. Login to the `server` machine using the `ssh` command. Example:
+The commands in this lab must be run on the `server-0` machine. Login to the `server-0` machine using the `ssh` command. Example:
 
 ```bash
-ssh root@server
-```
-
-## Provision the Kubernetes Control Plane
-
-Create the Kubernetes configuration directory:
-
-```bash
-mkdir -p /etc/kubernetes/config
-```
-
-### Install the Kubernetes Controller Binaries
-
-Install the Kubernetes binaries:
-
-```bash
-{
-  mv kube-apiserver \
-    kube-controller-manager \
-    kube-scheduler kubectl \
-    /usr/local/bin/
-}
-```
-
-### Configure the Kubernetes API Server
-
-```bash
-{
-  mkdir -p /var/lib/kubernetes/
-
-  mv ca.crt ca.key \
-    kube-api-server.key kube-api-server.crt \
-    service-accounts.key service-accounts.crt \
-    encryption-config.yaml \
-    /var/lib/kubernetes/
-}
-```
-
-Create the `kube-apiserver.service` systemd unit file:
-
-```bash
-mv kube-apiserver.service \
-  /etc/systemd/system/kube-apiserver.service
-```
-
-### Configure the Kubernetes Controller Manager
-
-Move the `kube-controller-manager` kubeconfig into place:
-
-```bash
-mv kube-controller-manager.kubeconfig /var/lib/kubernetes/
-```
-
-Create the `kube-controller-manager.service` systemd unit file:
-
-```bash
-mv kube-controller-manager.service /etc/systemd/system/
-```
-
-### Configure the Kubernetes Scheduler
-
-Move the `kube-scheduler` kubeconfig into place:
-
-```bash
-mv kube-scheduler.kubeconfig /var/lib/kubernetes/
+ssh -i /kthwLab/ssh/id_rsa root@server-0
 ```
 
 Create the `kube-scheduler.yaml` configuration file:
 
 ```bash
+mkdir -p /etc/kubernetes/config
 mv kube-scheduler.yaml /etc/kubernetes/config/
-```
-
-Create the `kube-scheduler.service` systemd unit file:
-
-```bash
-mv kube-scheduler.service /etc/systemd/system/
 ```
 
 ### Start the Controller Services
 
 ```bash
-{
-  systemctl daemon-reload
+systemctl daemon-reload
 
-  systemctl enable kube-apiserver \
-    kube-controller-manager kube-scheduler
+systemctl enable kube-apiserver \
+  kube-controller-manager kube-scheduler
 
-  systemctl start kube-apiserver \
-    kube-controller-manager kube-scheduler
-}
+systemctl start kube-apiserver \
+  kube-controller-manager kube-scheduler
 ```
 
 > Allow up to 10 seconds for the Kubernetes API Server to fully initialize.
@@ -155,10 +90,10 @@ In this section you will configure RBAC permissions to allow the Kubernetes API 
 
 > This tutorial sets the Kubelet `--authorization-mode` flag to `Webhook`. Webhook mode uses the [SubjectAccessReview](https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access) API to determine authorization.
 
-The commands in this section will affect the entire cluster and only need to be run on the `server` machine.
+The commands in this section will affect the entire cluster and only need to be run on the `server-0` machine.
 
 ```bash
-ssh root@server
+ssh -i /kthwLab/ssh/id_rsa root@server-0
 ```
 
 Create the `system:kube-apiserver-to-kubelet` [ClusterRole](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole) with permissions to access the Kubelet API and perform most common tasks associated with managing pods:

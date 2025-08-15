@@ -1,6 +1,6 @@
 # Provisioning a CA and Generating TLS Certificates
 
-In this lab you will provision a [PKI Infrastructure](https://en.wikipedia.org/wiki/Public_key_infrastructure) using openssl to bootstrap a Certificate Authority, and generate TLS certificates for the following components: kube-apiserver, kube-controller-manager, kube-scheduler, kubelet, and kube-proxy. The commands in this section should be run from the `jumpbox`.
+In this lab you will provision a [PKI Infrastructure](https://en.wikipedia.org/wiki/Public_key_infrastructure) using openssl to bootstrap a Certificate Authority, and generate TLS certificates for the following components: kube-apiserver, kube-controller-manager, kube-scheduler, kubelet, and kube-proxy. The commands in this section should be run from the host machine.
 
 ## Certificate Authority
 
@@ -16,16 +16,23 @@ You don't need to understand everything in the `ca.conf` file to complete this t
 
 Every certificate authority starts with a private key and root certificate. In this section we are going to create a self-signed certificate authority, and while that's all we need for this tutorial, this shouldn't be considered something you would do in a real-world production environment.
 
+> For certs we will create a new directory outside the `kubernetes-the-hard-way` directory.
+
+Create a new directory on jumpbox to manage certs:
+```bash
+mkdir -p /kthwLab/certs
+cd /kthwLab/certs
+cp /kthwLab/kubernetes-the-hard-way/ca.conf /kthwLab/certs/ca.conf
+```
+
 Generate the CA configuration file, certificate, and private key:
 
 ```bash
-{
-  openssl genrsa -out ca.key 4096
-  openssl req -x509 -new -sha512 -noenc \
-    -key ca.key -days 3653 \
-    -config ca.conf \
-    -out ca.crt
-}
+openssl genrsa -out ca.key 4096
+openssl req -x509 -new -sha512 -noenc \
+  -key ca.key -days 3653 \
+  -config ca.conf \
+  -out ca.crt
 ```
 
 Results:
@@ -71,7 +78,7 @@ done
 The results of running the above command will generate a private key, certificate request, and signed SSL certificate for each of the Kubernetes components. You can list the generated files with the following command:
 
 ```bash
-ls -1 *.crt *.key *.csr
+tree
 ```
 
 ## Distribute the Client and Server Certificates
@@ -82,26 +89,31 @@ Copy the appropriate certificates and private keys to the `worker-0` and `worker
 
 ```bash
 for host in worker-0 worker-1; do
-  ssh root@${host} mkdir /var/lib/kubelet/
+  ssh -i /kthwLab/ssh/id_rsa root@${host} mkdir /var/lib/kubelet/
 
-  scp ca.crt root@${host}:/var/lib/kubelet/
+  scp -i /kthwLab/ssh/id_rsa ca.crt root@${host}:/var/lib/kubelet/
 
-  scp ${host}/${host}.crt \
+  scp -i /kthwLab/ssh/id_rsa ${host}/${host}.crt \
     root@${host}:/var/lib/kubelet/kubelet.crt
 
-  scp ${host}/${host}.key \
+  scp -i /kthwLab/ssh/id_rsa ${host}/${host}.key \
     root@${host}:/var/lib/kubelet/kubelet.key
 done
 ```
 
-Copy the appropriate certificates and private keys to the `server` machine:
+Copy the appropriate certificates and private keys to the `server-0` machine:
 
 ```bash
-scp \
+ssh -i /kthwLab/ssh/id_rsa root@server-0 mkdir -p /var/lib/kubernetes/ /etc/etcd
+scp -i /kthwLab/ssh/id_rsa \
   ca.key ca.crt \
-  kube-api-server/kube-api-server.key kube-api-server/kube-api-server.crt \
-  service-accounts/service-accounts.key service-accounts/service-accounts.crt \
-  root@server-0:~/
+  kube-api-server/kube-api-server.crt kube-api-server/kube-api-server.key \
+  service-accounts/service-accounts.crt service-accounts/service-accounts.key \
+  root@server-0:/var/lib/kubernetes/
+scp -i /kthwLab/ssh/id_rsa \
+  ca.key ca.crt \
+  kube-api-server/kube-api-server.crt kube-api-server/kube-api-server.key \
+  root@server-0:/etc/etcd/
 ```
 
 > The `kube-proxy`, `kube-controller-manager`, `kube-scheduler`, and `kubelet` client certificates will be used to generate client authentication configuration files in the next lab.

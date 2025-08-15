@@ -19,9 +19,9 @@ cat machines.txt
 ```
 
 ```text
-XXX.XXX.XXX.XXX server-0.kubernetes.local server
-XXX.XXX.XXX.XXX worker-0.kubernetes.local worker-0 10.200.0.0/24
-XXX.XXX.XXX.XXX worker-1.kubernetes.local worker-1 10.200.1.0/24
+XXX.XXX.XXX.XXX server-0.kubernetes.local server-0 10.200.0.0/24
+XXX.XXX.XXX.XXX worker-0.kubernetes.local worker-0 10.200.1.0/24
+XXX.XXX.XXX.XXX worker-1.kubernetes.local worker-1 10.200.2.0/24
 ```
 
 Now it's your turn to create a `machines.txt` file with the details for the three machines you will be using to create your Kubernetes cluster. Use the example machine database from above and add the details for your machines.
@@ -56,7 +56,7 @@ systemctl restart sshd
 
 ### Generate and Distribute SSH Keys
 
-In this section you will generate and distribute an SSH keypair to the `server`, `worker-0`, and `worker-1`, machines, which will be used to run commands on those machines throughout this tutorial. Run the following commands from the `jumpbox` machine.
+In this section you will generate and distribute an SSH keypair to the `server-0`, `worker-0`, and `worker-1`, machines, which will be used to run commands on those machines throughout this tutorial. Run the following commands from the `jumpbox` machine.
 
 Generate a new SSH key:
 
@@ -97,7 +97,7 @@ worker-1
 
 ## Hostnames
 
-In this section you will assign hostnames to the `server`, `worker-0`, and `worker-1` machines. The hostname will be used when executing commands from the `jumpbox` to each machine. The hostname also plays a major role within the cluster. Instead of Kubernetes clients using an IP address to issue commands to the Kubernetes API server, those clients will use the `server` hostname instead. Hostnames are also used by each worker machine, `worker-0` and `worker-1` when registering with a given Kubernetes cluster.
+In this section you will assign hostnames to the `server-0`, `worker-0`, and `worker-1` machines. The hostname will be used when executing commands from the `jumpbox` to each machine. The hostname also plays a major role within the cluster. Instead of Kubernetes clients using an IP address to issue commands to the Kubernetes API server, those clients will use the `server-0` hostname instead. Hostnames are also used by each worker machine, `worker-0` and `worker-1` when registering with a given Kubernetes cluster.
 
 To configure the hostname for each machine, run the following commands on the `jumpbox`.
 
@@ -128,7 +128,7 @@ worker-1.kubernetes.local
 
 ## Host Lookup Table
 
-In this section you will generate a `hosts` file which will be appended to `/etc/hosts` file on the `jumpbox` and to the `/etc/hosts` files on all three cluster members used for this tutorial. This will allow each machine to be reachable using a hostname such as `server`, `worker-0`, or `worker-1`.
+In this section you will generate a `hosts` file which will be appended to `/etc/hosts` file on the `jumpbox` and to the `/etc/hosts` files on all three cluster members used for this tutorial. This will allow each machine to be reachable using a hostname such as `server-0`, `worker-0`, or `worker-1`.
 
 Create a new `hosts` file and add a header to identify the machines being added:
 
@@ -219,6 +219,6 @@ while read IP FQDN HOST SUBNET; do
 done < machines.txt
 ```
 
-At this point, hostnames can be used when connecting to machines from your `jumpbox` machine, or any of the three machines in the Kubernetes cluster. Instead of using IP addresses you can now connect to machines using a hostname such as `server`, `worker-0`, or `worker-1`.
+At this point, hostnames can be used when connecting to machines from your `jumpbox` machine, or any of the three machines in the Kubernetes cluster. Instead of using IP addresses you can now connect to machines using a hostname such as `server-0`, `worker-0`, or `worker-1`.
 
 Next: [Provisioning a CA and Generating TLS Certificates](04-certificate-authority.md)
