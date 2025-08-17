@@ -121,6 +121,12 @@ cat /tmp/default-net.xml.bak | while IFS= read -r line; do
       echo "      <host mac='${VM_MACS[$vm]}' name='${vm}.kubernetes.local' ip='${VM_IPS[$vm]}'/>" >> /tmp/default-net.xml
     done
   fi
+  # Skip existing host lines with matching MAC or IP
+  if [[ "$line" =~ \<host\ mac=\'([^\']+)\'[^\>]*ip=\'([^\']+)\' ]]; then
+    for vm in "${VMS[@]}"; do
+      [[ "${BASH_REMATCH[1]}" == "${VM_MACS[$vm]}" || "${BASH_REMATCH[2]}" == "${VM_IPS[$vm]}" ]] && continue 2
+    done
+  fi
   echo "$line" >> /tmp/default-net.xml
 done
 
