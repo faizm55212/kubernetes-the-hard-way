@@ -110,9 +110,8 @@ echo "Updating libvirt network with static DHCP entries..."
 # Backup current network XML
 virsh net-dumpxml default > /tmp/default-net.xml.bak
 
-if [ -f "/tmp/default-net.xml" ]; then
-    rm -rf /tmp/default-net.xml
-fi
+rm -f /tmp/default-net.xml
+rm -f /tmp/default-net.xml.bak
 
 # Build host entries dynamically from the associative arrays
 cat /tmp/default-net.xml.bak | while IFS= read -r line; do
@@ -165,7 +164,7 @@ EOF
 
 # 9. Append host entries to /etc/hosts
 echo "Creating machines.txt..."
-rm $BASE_DIR/machines.txt
+rm -f $BASE_DIR/machines.txt
 tee -a $BASE_DIR/machines.txt <<EOF
 ${VM_IPS[server-0]} server-0.kubernetes.local server-0 10.200.0.0/24
 ${VM_IPS[worker-0]} worker-0.kubernetes.local worker-0 10.200.1.0/24
