@@ -108,11 +108,10 @@ done
 echo "Updating libvirt network with static DHCP entries..."
 
 # Backup current network XML
-virsh net-dumpxml default > /tmp/default-net.xml.bak
-
 rm -f /tmp/default-net.xml
 rm -f /tmp/default-net.xml.bak
 
+virsh net-dumpxml default > /tmp/default-net.xml.bak
 # Build host entries dynamically from the associative arrays
 cat /tmp/default-net.xml.bak | while IFS= read -r line; do
   if [[ "$line" =~ "</dhcp>" ]]; then
