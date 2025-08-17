@@ -4,6 +4,7 @@ set -e
 cat <<'EOF' > /root/firstboot.sh
 #!/bin/bash
 set -e
+exec > >(tee -a /var/log/firstboot.log) 2>&1
 
 VM_NAME="${1}"
 
@@ -22,7 +23,7 @@ STATIC_HOSTS=$(cat <<EOT
 EOT
 )
 
-SSH_PUBKEY='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCtVm2B684Vx7FaRjgq8aNACRAg0UyfuKKmbBVx0AmZR7TTNEtCl3yA72hEQ2q0jRAr2m4kOprmMS48f0Ic9SPPSbp1zZCHDfcUMG9E1yiCX5uQIveXuGGiWniAE2EuttlYBd0Ij/FGeE4eLpmescAP6pDqJfbeeN2eFoJgA+tfaijCTeq9SryaOCViuCSk8ymNli6MNMD/3DAkEL8QLYeR9xsbfVr/3q50nNJvR5LlUmvlp/a1ufniFe1HN02aPI0/4W/N0bmEKUSZRadsTzI5Tl3I6376bf3UpwQJYZkLn+BKWcpkOECmEYnQuJycnvwZkz95j6Gu8dIzl039P0r+jTZEje8OQpN1XtxM4ff6WslqWfC1BigiTgIGP1NnoQ7ZD9R68Sw7+MDGXp44ByovF9SaVnuoY2371y0DKd+61MH/e+Uzn1crzWBK9oN+zZTRIoJU+Waq8dbajVI94yXlwFaoqWV77BhKUgCwhgsFra2m9EOlFFBSsKggfQUhon8= root@unknown-pc'
+SSH_PUBKEY='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC/AKeijOTE1ZKKkbG6q/MVx4OmqkUC2f2416H0QcDdZaX0ee6wPFah/EuPw3zrQL0AUwXZE2x2WlAUoHJYgeqKGKSGBI6erF3aNvydEIGr/XDsuespLlN04M/hE4D6hNhWBo9Vd6MrvVw+4B6ELE6344NhDYkLkzy7q98M3dRWbyH1aaZg6gsUMxRS405jvLYmkzSr8PE/U3J5rhQ+UDJMFdbr+pV0f5GV/4Q+xKZ9O3Ax+jcHA0DCWz9W03t/lSx9JG/m/bzuGcyWs2068lYdKla12gmXXAPitIcyQ8+zjdtYIJXfABkr7QJArXqk8egpVaiRspVs2XzeIGK6RmTG17nbdnvAXxfOqOIuTp3ko6Zc1BCLwqWj93euMeONy05GIL3oxhASUfg2V86SShHKK/QYqts9sKUW3LrxGbgYXIE7MfRA/121cuxTJA3YU0+5ElfJWLIn4MZ6HTEf3/8ss77c5dje9jWJ1CqPENxn0Ub4pz/bfaiZo/eiI8kc+vE= root@unknown-pc'
 
 echo "[*] Setting hostname to $VM_NAME"
 echo "$VM_NAME" > /etc/hostname
