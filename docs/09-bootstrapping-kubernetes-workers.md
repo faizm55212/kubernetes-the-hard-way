@@ -35,7 +35,7 @@ for HOST in worker-0 worker-1; do
     /kthwLab/Downloads/client/kubectl \
     root@${HOST}:/usr/local/bin/
   scp -i /kthwLab/ssh/id_rsa \
-    /kthwLab/Downloads/worker/containerd /kthwLab/Downloads/worker/containerd-shim-runc-v2\
+    /kthwLab/Downloads/worker/containerd /kthwLab/Downloads/worker/containerd-shim-runc-v2 \
     /kthwLab/Downloads/worker/containerd-stress \
     root@${HOST}:/bin/
   scp -i /kthwLab/ssh/id_rsa \
