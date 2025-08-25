@@ -14,7 +14,7 @@ Let's allocate a directory in / for this lab
 
 ```bash
 sudo mkdir /kthwLab/
-sudo chown $USER:$USER /kthwLab/
+sudo chown $USER:$(id -gn) /kthwLab/
 cd /kthwLab/
 ```
 
