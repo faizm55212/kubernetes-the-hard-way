@@ -129,7 +129,10 @@ cat /tmp/default-net.xml.bak | while IFS= read -r line; do
 done
 
 # Redefine and restart the network
-virsh net-destroy default
+if virsh net-info default | grep -q "Active:.*yes"; then
+  virsh net-destroy default
+fi
+
 virsh net-undefine default
 virsh net-define /tmp/default-net.xml
 virsh net-start default
